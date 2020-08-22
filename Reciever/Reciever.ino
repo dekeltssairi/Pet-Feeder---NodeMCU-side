@@ -1,34 +1,82 @@
 //-----------------------------includes----------------------------
  #include <Servo.h>        //Servo library
+ #include <SoftwareSerial.h>
 //-----------------------------Globals-----------------------------
-int data;
+//int readedData, dataToWrite;
+SoftwareSerial ArduinoUno(3,2);
 Servo servo;      
 int servoPin = 9;
 const unsigned char Passive_buzzer = 5;
+const int trigPin = 10;
+const int echoPin = 11;
+long duration;
+int distance;
+enum e_Task {
+  DROP_FOOD = 1,
+  MAKE_NOISE,
+  DISTANCE
+};
+e_Task task;
 //-----------------------Dunction Declartion-----------------
 void onServo();
 void onBuzzer();
+void onUltrasonic();
 void initializeSerial();
 void initializeServo();
 void initializeBuzzer();
-
+void initializeUltrasonic();
+void checkDistance();
 
 void setup() {
   initializeSerial();
   initializeServo();
   initializeBuzzer();
+  initializeUltrasonic();
 }
 
 void loop() {
-  data = Serial.read(); //Read the serial data and store it
-  Serial.print(data);
-  if (data == 1){
-    onServo();
+
+  if(ArduinoUno.available()>0){
+    task = (e_Task)ArduinoUno.parseInt();
+    if (task == DROP_FOOD){
+      onServo();
+    }
+    else if(task == MAKE_NOISE){
+      onBuzzer();
+    }
+    else if(task == DISTANCE){
+        onUltrasonic();
+    }    
   }
-  else if(data == 2){
-    onBuzzer();
+  else{
+    checkDistance();
   }
+
   delay(1000);
+}
+
+void checkDistance(){
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance= duration*0.034/2;
+  // Prints the distance on the Serial Monitor
+  
+  delay(10000); 
+  if (distance < 50){
+   
+    Serial.println(distance);
+  }
+  else{
+    Serial.println(distance);
+    ArduinoUno.print(distance);
+  }
 }
 
 void onServo(){
@@ -68,4 +116,14 @@ void initializeServo(){
 
 void initializeSerial(){
   Serial.begin(9600);
+  ArduinoUno.begin(4800);
+}
+
+void initializeUltrasonic(){
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT); 
+}
+
+void onUltrasonic(){
+  ArduinoUno.print(distance);
 }
