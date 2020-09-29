@@ -34,7 +34,7 @@ void checkNotification();
 void sendNoFoodNotification();
 void setup() {
   initializeSerial();
-  initializeWifi("DEKEL_TSAIRI", "18181818");
+  initializeWifi("home63", "18181818");
   sendIdToServer();
 }
 
@@ -55,13 +55,13 @@ void loop() {
     url.concat(ESP.getChipId());
     url.concat("/flags");
     if (http.begin(client, url)) { 
-      
+      String target = String("{\"test\":\"");
       Serial.print("[HTTP] FETCHING FLAGS...\n");
-      int httpCode = http.GET();
+      int httpCode = http.POST(target);
       
       if (httpCode > 0) {
         
-        Serial.printf("[HTTP] GET FLAGS... code: %d\n", httpCode);
+        Serial.printf("[HTTP] FETCHING FLAGS... code: %d\n", httpCode);
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           
           String json = http.getString();
@@ -281,7 +281,7 @@ void sendIdToServer(){
          Serial.printf("[HTTP] POST... code: %d\n", httpCode);
 
         // file found at server
-        if (httpCode == HTTP_CODE_CREATED || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+        if (httpCode == HTTP_CODE_CREATED || httpCode == HTTP_CODE_MOVED_PERMANENTLY || httpCode == HTTP_CODE_BAD_REQUEST) {
           String payload = http.getString();
           isIdSent = true;
           Serial.println(payload);
