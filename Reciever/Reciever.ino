@@ -1,8 +1,8 @@
 //-----------------------------includes----------------------------
  #include <Servo.h>        //Servo library
  #include <SoftwareSerial.h>
+ 
 //-----------------------------Globals-----------------------------
-//int readedData, dataToWrite;
 SoftwareSerial ArduinoUno(3,2);
 Servo servo;      
 int servoPin = 9;
@@ -17,6 +17,7 @@ enum e_Task {
   DISTANCE
 };
 e_Task task;
+
 //-----------------------Dunction Declartion-----------------
 void onServo();
 void onBuzzer();
